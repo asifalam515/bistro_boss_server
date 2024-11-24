@@ -10,7 +10,7 @@ app.use(express.json());
 
 // MONGODB part:
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
+const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 // const uri =
 //   "mongodb+srv://<db_username>:<db_password>@cluster0.6tngyrc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASSWORD}@cluster0.6tngyrc.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
@@ -46,6 +46,12 @@ async function run() {
     });
 
     // carts collection:
+    app.delete("/carts/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await cartCollection.deleteOne(query);
+      res.send(result);
+    });
     app.get("/carts", async (req, res) => {
       const email = req.query.email;
       const query = { email: email };
