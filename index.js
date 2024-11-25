@@ -35,6 +35,10 @@ async function run() {
     const cartCollection = database.collection("carts");
 
     // users related API:
+    app.get("/users", async (req, res) => {
+      const result = await userCollection.find().toArray();
+      res.send(result);
+    });
     app.post("/users", async (req, res) => {
       const user = req.body;
       // insert email if use doesn't exist
