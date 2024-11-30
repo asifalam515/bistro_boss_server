@@ -134,7 +134,10 @@ async function run() {
     });
 
     // get all the menu
-
+    app.get("/menu", async (req, res) => {
+      const results = await menuCollection.find().toArray();
+      res.send(results);
+    });
     app.get("/menu", verifyToken, verifyAdmin, async (req, res) => {
       const results = await menuCollection.find().toArray();
       res.send(results);
