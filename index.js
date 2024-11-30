@@ -79,8 +79,9 @@ async function run() {
     // make admin api route
     app.patch(
       "/users/admin/:id",
-      verifyAdmin,
       verifyToken,
+      verifyAdmin,
+
       async (req, res) => {
         const id = req.params.id;
         const filter = { _id: new ObjectId(id) };
@@ -94,7 +95,7 @@ async function run() {
       }
     );
     // delete a specific user:
-    app.delete("/users/:id", verifyAdmin, verifyToken, async (req, res) => {
+    app.delete("/users/:id", verifyToken, verifyAdmin, async (req, res) => {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await userCollection.deleteOne(query);
@@ -133,9 +134,16 @@ async function run() {
     });
 
     // get all the menu
+
     app.get("/menu", async (req, res) => {
       const results = await menuCollection.find().toArray();
       res.send(results);
+    });
+
+    app.post("/menu", async (req, res) => {
+      const item = req.body;
+      const result = await menuCollection.insertOne(item);
+      res.send(result);
     });
 
     // get all the reviews data
