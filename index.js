@@ -154,6 +154,13 @@ async function run() {
       const result = await menuCollection.insertOne(item);
       res.send(result);
     });
+    // update specific item/menu
+    app.get("/menu/:id", async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: new ObjectId(id) };
+      const result = await menuCollection.findOne(query);
+      res.send(result);
+    });
 
     // get all the reviews data
     app.get("/reviews", async (req, res) => {
