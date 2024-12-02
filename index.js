@@ -35,6 +35,7 @@ async function run() {
     const menuCollection = database.collection("menu");
     const reviewsCollection = database.collection("reviews");
     const cartCollection = database.collection("carts");
+    const paymentsCollection = database.collection("payments");
 
     // custom middleware to verify token
 
@@ -207,10 +208,11 @@ async function run() {
       const result = await cartCollection.insertOne(cartItem);
       res.send(result);
     });
-    // payment ::::
+    // payment related api::::
     app.post("/create-payment-intent", async (req, res) => {
       const { price } = req.body;
       const amount = parseInt(price * 100);
+      console.log("amount inside the intent ", amount);
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
         currency: "usd",
@@ -220,7 +222,27 @@ async function run() {
         clientSecret: paymentIntent.client_secret,
       });
     });
-
+    //
+    app.get("/payments:email", verifyToken, async (req, res) => {
+      const query = { email: req.params.email };
+      if (req.params.email !== req.decoded.email) {
+        return res.status(401).send({ message: "forbidden access" });
+      }
+      const result = await paymentsCollection.find(query).toArray();
+      res.send(result);
+    });
+    app.post("/payments", async (req, res) => {
+      const payment = req.body;
+      const paymentResult = await paymentsCollection.insertOne(payment);
+      // carefully delete each item from the cart
+      const query = {
+        _id: {
+          $in: payment.cartIds.map((id) => new ObjectId(id)),
+        },
+      };
+      const deleteResult = await cartCollection.deleteMany(query);
+      res.send({ paymentResult, deleteResult });
+    });
     await client.db("admin").command({ ping: 1 });
     console.log(
       "Pinged your deployment. You successfully connected to MongoDB!"
